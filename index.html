@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Life OS | Minimalist Luxury</title>
+    <title>Life OS | Minimalist</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
@@ -12,14 +12,11 @@
             --bg-color: #FDFDFD;
             --card-bg: #FFFFFF;
             --text-main: #55524E;
-            --text-muted: #B8B4AF;
             --border-color: #F1F1EE;
-            
-            /* 模块主题色 */
-            --color-growth: #9DB2A0;
-            --color-fitness: #B8979F;
-            --color-beauty: #D6BBA0;
-            --color-soul: #A0B2C0;
+            --growth: #9DB2A0;
+            --fitness: #B8979F;
+            --beauty: #D6BBA0;
+            --soul: #A0B2C0;
         }
 
         body { 
@@ -34,12 +31,10 @@
             border: 1px solid var(--border-color);
             border-radius: 2.25rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.01);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s ease;
         }
 
-        .soft-card:active {
-            transform: scale(0.98);
-        }
+        .soft-card:active { transform: scale(0.98); }
 
         .heatmap-cell {
             aspect-ratio: 1;
@@ -47,32 +42,22 @@
             background-color: #F9F9F7;
             border: 1px solid var(--border-color);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .heatmap-cell.today {
-            border-color: #E5E5E0;
-            background: #FFF;
-            box-shadow: inset 0 0 0 1px #E5E5E0;
-        }
+        .heatmap-cell.today { border-color: #E5E5E0; background: #FFF; }
 
         .dot-group {
             display: flex;
+            flex-wrap: wrap;
             gap: 2px;
-            position: absolute;
-            bottom: 3px;
-            left: 50%;
-            transform: translateX(-50%);
+            padding: 2px;
+            justify-content: center;
         }
 
-        .dot {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-        }
-
-        input::placeholder {
-            color: #D1CDC8;
-        }
+        .dot { width: 3px; height: 3px; border-radius: 50%; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
@@ -80,58 +65,48 @@
 <body class="no-scrollbar px-6 py-10 pb-28 flex justify-center">
     <div class="w-full max-w-[420px] space-y-9">
         
-        <!-- HEADER: 天气日期 & 极简建议 -->
+        <!-- HEADER -->
         <header class="space-y-4">
             <div class="flex justify-between items-end">
                 <div class="space-y-1">
                     <h1 class="text-2xl font-light tracking-tight">Life OS</h1>
-                    <div id="current-date" class="text-[10px] font-semibold text-[#B8B4AF] uppercase tracking-[0.2em]">MARCH 02, MON</div>
+                    <div id="date-display" class="text-[10px] font-semibold text-[#B8B4AF] uppercase tracking-[0.2em]">LOADING...</div>
                 </div>
                 <div class="flex items-center gap-2 text-[#9A9691] text-xs font-medium bg-[#F9F9F7] px-3 py-1.5 rounded-full border border-[#F1F1EE]">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>
                     <span>14°C</span>
                 </div>
             </div>
-            
             <div class="pl-3 border-l-2 border-[#F1F1EE] ml-0.5">
-                <p id="ai-insight" class="text-[11px] text-[#A3A09A] leading-relaxed tracking-wide font-medium">
-                    14°C, 舒爽微风。宜叠穿针织，保持室内通风，高效执行。
+                <p class="text-[11px] text-[#A3A09A] leading-relaxed tracking-wide font-medium">
+                    14°C, 舒爽微风。宜叠穿针织，保持专注，享受当下的节奏。
                 </p>
             </div>
         </header>
 
-        <!-- RITUAL: 日程与日记 -->
-        <section class="soft-card p-9 space-y-8">
+        <!-- RITUAL & DIARY -->
+        <section class="soft-card p-8 space-y-8">
             <div class="space-y-1">
-                <h2 class="text-sm font-semibold text-[#55524E] tracking-tight">Daily Ritual</h2>
+                <h2 class="text-sm font-semibold text-[#55524E]">Daily Ritual</h2>
                 <p class="text-[9px] text-[#B8B4AF] font-bold uppercase tracking-widest">Schedule & Diary</p>
             </div>
 
-            <div class="space-y-4" id="schedule-container">
-                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
-                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Morning Meditation
-                </div>
-                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
-                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Productive Focus
-                </div>
-                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
-                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Wellness Walk
-                </div>
-                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
-                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Reading Session
-                </div>
+            <div class="space-y-4 text-xs text-[#7A7672] font-medium">
+                <div class="flex items-center gap-4"><div class="w-1 h-1 rounded-full bg-[#E5E5E0]"></div>Morning Meditation</div>
+                <div class="flex items-center gap-4"><div class="w-1 h-1 rounded-full bg-[#E5E5E0]"></div>Productive Deep Work</div>
+                <div class="flex items-center gap-4"><div class="w-1 h-1 rounded-full bg-[#E5E5E0]"></div>Wellness Walk</div>
             </div>
 
             <div class="pt-4 relative">
-                <input id="diary-input" type="text" placeholder="Record your focus..." 
+                <input id="diary" type="text" placeholder="Record your thoughts..." 
                     class="w-full bg-[#F9F9F7] rounded-2xl py-4 pl-5 pr-12 text-xs font-medium border border-transparent focus:bg-white focus:border-[#F1F1EE] outline-none transition-all">
-                <button id="send-btn" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#D1CDC8] hover:text-[#A3A09A]">
+                <button onclick="addDiaryNote()" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#D1CDC8]">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
             </div>
         </section>
 
-        <!-- FLOW: 数据统计热力图 -->
+        <!-- HEATMAP -->
         <section class="space-y-4 px-1">
             <div class="flex justify-between items-center px-1">
                 <span class="text-[10px] font-bold text-[#B8B4AF] uppercase tracking-[0.2em]">Activity Flow</span>
@@ -142,136 +117,89 @@
                     <div class="w-1.5 h-1.5 rounded-full bg-[#A0B2C0]"></div>
                 </div>
             </div>
-            <div class="grid grid-cols-7 gap-2" id="heatmap-grid">
-                <!-- 由 JavaScript 填充 -->
-            </div>
+            <div class="grid grid-cols-7 gap-2" id="heatmap-grid"></div>
         </section>
 
-        <!-- HABITS: 四个核心模块 -->
+        <!-- HABIT TILES (ALL 4 MODULES) -->
         <div class="grid grid-cols-2 gap-5">
             <!-- Growth -->
-            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="growth">
+            <div onclick="tapHabit('growth')" class="soft-card p-7 flex flex-col gap-6 cursor-pointer">
                 <div class="flex justify-between items-start">
                     <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F4F7F5] text-[#9DB2A0]">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8a13 13 0 0 1-13 13Z"/><path d="M9.5 15.34a5 5 0 0 1 0-5.34"/></svg>
                     </div>
-                    <span class="counter text-[10px] font-bold text-[#9DB2A0]">0</span>
+                    <span id="count-growth" class="text-[10px] font-bold text-[#9DB2A0]">0</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-semibold text-[#55524E]">Self Growth</h3>
-                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Focus</p>
-                </div>
+                <div><h3 class="text-xs font-semibold">Growth</h3><p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Focus</p></div>
             </div>
-
             <!-- Fitness -->
-            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="fitness">
+            <div onclick="tapHabit('fitness')" class="soft-card p-7 flex flex-col gap-6 cursor-pointer">
                 <div class="flex justify-between items-start">
                     <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F8F4F5] text-[#B8979F]">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14.71 13 3l-2.25 8.25H20L11 21l2.25-8.25H4Z"/></svg>
                     </div>
-                    <span class="counter text-[10px] font-bold text-[#B8979F]">0</span>
+                    <span id="count-fitness" class="text-[10px] font-bold text-[#B8979F]">0</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-semibold text-[#55524E]">Fitness</h3>
-                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Check In</p>
-                </div>
+                <div><h3 class="text-xs font-semibold">Fitness</h3><p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Check In</p></div>
             </div>
-
             <!-- Beauty -->
-            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="beauty">
+            <div onclick="tapHabit('beauty')" class="soft-card p-7 flex flex-col gap-6 cursor-pointer">
                 <div class="flex justify-between items-start">
                     <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F9F7F4] text-[#D6BBA0]">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
                     </div>
-                    <span class="counter text-[10px] font-bold text-[#D6BBA0]">0</span>
+                    <span id="count-beauty" class="text-[10px] font-bold text-[#D6BBA0]">0</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-semibold text-[#55524E]">Beauty</h3>
-                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Ritual</p>
-                </div>
+                <div><h3 class="text-xs font-semibold">Beauty</h3><p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Ritual</p></div>
             </div>
-
             <!-- Soul Space -->
-            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="soul">
+            <div onclick="tapHabit('soul')" class="soft-card p-7 flex flex-col gap-6 cursor-pointer">
                 <div class="flex justify-between items-start">
                     <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F4F7F9] text-[#A0B2C0]">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h12Z"/><path d="M17 12h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/></svg>
                     </div>
-                    <span class="counter text-[10px] font-bold text-[#A0B2C0]">0</span>
+                    <span id="count-soul" class="text-[10px] font-bold text-[#A0B2C0]">0</span>
                 </div>
-                <div>
-                    <h3 class="text-xs font-semibold text-[#55524E]">Soul Space</h3>
-                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Peace</p>
-                </div>
+                <div><h3 class="text-xs font-semibold">Soul Space</h3><p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Peace</p></div>
             </div>
         </div>
     </div>
 
     <script>
-        // 1. 初始化日期
-        const dateDisplay = document.getElementById('current-date');
         const now = new Date();
-        const options = { month: 'long', day: 'numeric', weekday: 'short' };
-        dateDisplay.innerText = now.toLocaleDateString('en-US', options).toUpperCase();
+        const colors = { growth: '#9DB2A0', fitness: '#B8979F', beauty: '#D6BBA0', soul: '#A0B2C0' };
+        let stats = { growth: 0, fitness: 0, beauty: 0, soul: 0 };
 
-        // 2. 模拟数据存储 (你可以之后替换为 Firebase)
-        let habitStats = { growth: 0, fitness: 0, beauty: 0, soul: 0 };
+        // 初始化日期
+        document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' }).toUpperCase();
 
-        // 3. 生成日历热力图
-        const heatmapGrid = document.getElementById('heatmap-grid');
-        const daysInMonth = 28; 
-        for (let i = 1; i <= daysInMonth; i++) {
+        // 生成热力图
+        const grid = document.getElementById('heatmap-grid');
+        for (let i = 1; i <= 28; i++) {
             const cell = document.createElement('div');
             cell.className = `heatmap-cell ${i === now.getDate() ? 'today' : ''}`;
-            cell.innerHTML = `
-                <span class="text-[7px] font-bold text-[#D1CDC8] m-1 inline-block">${i}</span>
-                <div class="dot-group" id="dots-${i}"></div>
-            `;
-            heatmapGrid.appendChild(cell);
+            cell.innerHTML = `<span class="text-[7px] font-bold text-[#D1CDC8] m-1">${i}</span><div class="dot-group" id="dots-${i}"></div>`;
+            grid.appendChild(cell);
         }
 
-        // 4. 打卡交互逻辑
-        document.querySelectorAll('.habit-tile').forEach(tile => {
-            tile.onclick = () => {
-                const type = tile.getAttribute('data-type');
-                habitStats[type]++;
-                
-                // 更新磁贴数字
-                tile.querySelector('.counter').innerText = habitStats[type];
-                
-                // 在热力图今天的位置添加一个小点
-                const todayDots = document.getElementById(`dots-${now.getDate()}`);
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--color-${type}`);
-                todayDots.appendChild(dot);
-            };
-        });
+        // 打卡逻辑
+        function tapHabit(type) {
+            stats[type]++;
+            document.getElementById(`count-${type}`).innerText = stats[type];
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.backgroundColor = colors[type];
+            document.getElementById(`dots-${now.getDate()}`).appendChild(dot);
+        }
 
-        // 5. 日记输入逻辑
-        const diaryInput = document.getElementById('diary-input');
-        const sendBtn = document.getElementById('send-btn');
-        const insightText = document.getElementById('ai-insight');
-
-        sendBtn.onclick = () => {
-            const val = diaryInput.value.trim();
-            if (!val) return;
-            
-            // 简单反馈动画
-            insightText.innerText = "已记录：计划正在有条不紊地推进。";
-            diaryInput.value = "";
-            
-            // 模拟在 Schedule 里添加一项
-            const container = document.getElementById('schedule-container');
-            const newItem = document.createElement('div');
-            newItem.className = "flex items-center gap-4 text-xs text-[#7A7672] font-medium opacity-0 transform translate-y-2 transition-all duration-300";
-            newItem.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-[#D6BBA0]"></div>${val}`;
-            container.appendChild(newItem);
-            
-            setTimeout(() => {
-                newItem.classList.remove('opacity-0', 'translate-y-2');
-            }, 10);
-        };
+        // 日记模拟
+        function addDiaryNote() {
+            const input = document.getElementById('diary');
+            if(input.value) {
+                input.value = '';
+                alert('Notes recorded for today.');
+            }
+        }
     </script>
 </body>
 </html>
