@@ -3,293 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Life OS | Aesthetic Minimalist</title>
+    <title>Life OS | Minimalist Luxury</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --bg-color: #FDFDFD;
+            --card-bg: #FFFFFF;
+            --text-main: #55524E;
+            --text-muted: #B8B4AF;
+            --border-color: #F1F1EE;
+            
+            /* 模块主题色 */
+            --color-growth: #9DB2A0;
+            --color-fitness: #B8979F;
+            --color-beauty: #D6BBA0;
+            --color-soul: #A0B2C0;
+        }
+
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #FDFDFD; 
-            color: #55524E;
+            background-color: var(--bg-color); 
+            color: var(--text-main);
             -webkit-font-smoothing: antialiased;
         }
+
         .soft-card {
-            background: #FFFFFF;
-            border: 1px solid #F1F1EE;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 2.25rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.01);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .soft-card:active {
+            transform: scale(0.98);
+        }
+
         .heatmap-cell {
             aspect-ratio: 1;
-            border-radius: 5px;
+            border-radius: 6px;
             background-color: #F9F9F7;
-            border: 1px solid #F1F1EE;
+            border: 1px solid var(--border-color);
+            position: relative;
         }
-        .heatmap-cell.active {
+
+        .heatmap-cell.today {
             border-color: #E5E5E0;
+            background: #FFF;
+            box-shadow: inset 0 0 0 1px #E5E5E0;
         }
+
+        .dot-group {
+            display: flex;
+            gap: 2px;
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+        }
+
+        input::placeholder {
+            color: #D1CDC8;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="no-scrollbar">
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const Icon = ({ name, size = 16, className = "", color = "currentColor" }) => {
-            const icons = {
-                leaf: `<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8a13 13 0 0 1-13 13Z"/><path d="M9.5 15.34a5 5 0 0 1 0-5.34"/>`,
-                zap: `<path d="M4 14.71 13 3l-2.25 8.25H20L11 21l2.25-8.25H4Z"/>`,
-                sparkles: `<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>`,
-                coffee: `<path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h12Z"/><path d="M17 12h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/>`,
-                sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/>`,
-                'pen-line': `<path d="M12 20h9"/><path d="m16.5 3.5 5 5L7 22l-5 1 1-5Z"/>`,
-                'arrow-right': `<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>`,
-                plus: `<path d="M12 5v14"/><path d="M5 12h14"/>`
-            };
-            return (
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width={size} 
-                    height={size} 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke={color} 
-                    strokeWidth="1.2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    className={className}
-                    dangerouslySetInnerHTML={{ __html: icons[name] || "" }}
-                />
-            );
-        };
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'aesthetic-life-v1';
-
-        window.firebaseApp = { auth, db, appId, signInAnonymously, onAuthStateChanged, signInWithCustomToken, doc, setDoc, onSnapshot };
-    </script>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        const THEME = {
-            growth: { label: 'Growth', color: '#9DB2A0', bg: '#F4F7F5' },
-            fitness: { label: 'Fitness', color: '#B8979F', bg: '#F8F4F5' },
-            beauty: { label: 'Beauty', color: '#D6BBA0', bg: '#F9F7F4' },
-            soul: { label: 'Soul', color: '#A0B2C0', bg: '#F4F7F9' },
-        };
-
-        const SCHEDULE = ['Morning Meditation', 'Productive Focus', 'Wellness Walk', 'Reading Session'];
-
-        const apiKey = ""; 
-
-        function App() {
-            const { auth, db, appId, signInAnonymously, onAuthStateChanged, signInWithCustomToken, doc, setDoc, onSnapshot } = window.firebaseApp;
-            
-            const [user, setUser] = useState(null);
-            const [diary, setDiary] = useState('');
-            const [loading, setLoading] = useState(false);
-            const [habitData, setHabitData] = useState({});
-            const [insight, setInsight] = useState("14°C, 舒爽微风。宜叠穿针织，高效完成今日计划。");
-
-            const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
-            const dateDisplay = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'short' });
-
-            useEffect(() => {
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                };
-                initAuth();
-                const unsubscribe = onAuthStateChanged(auth, setUser);
-                return () => unsubscribe();
-            }, []);
-
-            useEffect(() => {
-                if (!user) return;
-                const docRef = doc(db, 'artifacts', appId, 'users', user.uid, 'data', 'tracker');
-                const unsub = onSnapshot(docRef, (docSnap) => {
-                    if (docSnap.exists()) setHabitData(docSnap.data());
-                });
-                return () => unsub();
-            }, [user]);
-
-            const logActivity = async (type) => {
-                if (!user) return;
-                const current = habitData[todayStr] || [];
-                const newData = { ...habitData, [todayStr]: [...current, type] };
-                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'data', 'tracker'), newData);
-            };
-
-            const handleDiarySubmit = async () => {
-                if (!diary.trim() || !user) return;
-                setLoading(true);
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: `Diary: "${diary}". Context: 14°C. 
-                                Based on weather and diary, give 1 short efficient suggestion in Chinese (max 15 chars). 
-                                Return JSON: {"categories": ["growth"], "suggestion": "建议内容"}` }] }],
-                            generationConfig: { responseMimeType: "application/json" }
-                        })
-                    });
-                    const res = await response.json();
-                    const result = JSON.parse(res.candidates[0].content.parts[0].text);
-                    if (result.categories) {
-                        let updated = [...(habitData[todayStr] || [])];
-                        result.categories.forEach(cat => updated.push(cat));
-                        await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'data', 'tracker'), { ...habitData, [todayStr]: updated });
-                    }
-                    if (result.suggestion) setInsight(result.suggestion);
-                    setDiary('');
-                } catch (e) {
-                    setInsight("正在保持同步...");
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="min-h-screen px-7 py-10 pb-28 flex justify-center">
-                    <div className="w-full max-w-[420px] space-y-9">
-                        
-                        {/* Header & Mini Insight */}
-                        <header className="space-y-4">
-                            <div className="flex justify-between items-end">
-                                <div className="space-y-1">
-                                    <h1 className="text-2xl font-light tracking-tight text-[#44423E]">Life OS</h1>
-                                    <div className="text-[10px] font-semibold text-[#B8B4AF] uppercase tracking-[0.2em]">{dateDisplay}</div>
-                                </div>
-                                <div className="flex items-center gap-2 text-[#9A9691] text-xs font-medium bg-[#F9F9F7] px-3 py-1.5 rounded-full border border-[#F1F1EE]">
-                                    <Icon name="sun" size={13} />
-                                    <span>14°C</span>
-                                </div>
-                            </div>
-                            
-                            {/* AI Insight - Mini Text Under Header */}
-                            <div className="pl-0.5 border-l-2 border-[#F1F1EE] ml-0.5 pl-3">
-                                <p className="text-[11px] text-[#A3A09A] leading-relaxed tracking-wide font-medium">
-                                    {insight}
-                                </p>
-                            </div>
-                        </header>
-
-                        {/* Schedule & Diary Section */}
-                        <section className="soft-card p-9 space-y-8">
-                            <div className="space-y-1">
-                                <h2 className="text-sm font-semibold text-[#55524E] tracking-tight">Today's Ritual</h2>
-                                <p className="text-[9px] text-[#B8B4AF] font-bold uppercase tracking-widest">Schedule & Diary</p>
-                            </div>
-
-                            {/* Minimalist Task List (Schedule) */}
-                            <div className="space-y-4">
-                                {SCHEDULE.map((task, idx) => (
-                                    <div key={idx} className="flex items-center gap-4">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>
-                                        <span className="text-xs text-[#7A7672] font-medium">{task}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Diary Input (Nested) */}
-                            <div className="pt-2">
-                                <div className="relative">
-                                    <input 
-                                        value={diary}
-                                        onChange={(e) => setDiary(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleDiarySubmit()}
-                                        placeholder="Note today's focus..."
-                                        className="w-full bg-[#F9F9F7] rounded-2xl py-4 pl-5 pr-12 text-xs font-medium border border-transparent focus:bg-white focus:border-[#F1F1EE] outline-none transition-all placeholder:text-[#D1CDC8]"
-                                    />
-                                    <button 
-                                        onClick={handleDiarySubmit}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D1CDC8] hover:text-[#A3A09A] transition-colors"
-                                    >
-                                        {loading ? <div className="w-3.5 h-3.5 border border-[#D1CDC8] border-t-transparent rounded-full animate-spin" /> : <Icon name="arrow-right" size={16} />}
-                                    </button>
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Analysis (Heatmap) */}
-                        <section className="space-y-4 px-1">
-                            <div className="flex justify-between items-center px-1">
-                                <span className="text-[10px] font-bold text-[#B8B4AF] uppercase tracking-[0.2em]">Activity Flow</span>
-                                <div className="flex gap-1.5">
-                                    {Object.values(THEME).map(t => <div key={t.color} className="w-1.5 h-1.5 rounded-full" style={{backgroundColor: t.color}}></div>)}
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-7 gap-2">
-                                {Array.from({ length: 28 }, (_, i) => i + 1).map(d => {
-                                    const dateKey = `2026-03-${d.toString().padStart(2, '0')}`;
-                                    const items = habitData[dateKey] || [];
-                                    const isToday = d === today.getDate();
-                                    return (
-                                        <div key={d} className={`heatmap-cell flex flex-col p-1 ${isToday ? 'active' : ''}`}>
-                                            <span className="text-[7px] font-bold text-[#D1CDC8] mb-0.5">{d}</span>
-                                            <div className="flex flex-wrap gap-0.5 mt-auto">
-                                                {items.slice(0, 4).map((h, i) => (
-                                                    <div key={i} className="w-1 h-1 rounded-full" style={{ backgroundColor: THEME[h]?.color || '#E5E5E0' }} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </section>
-
-                        {/* Minimal Habit Tiles */}
-                        <div className="grid grid-cols-2 gap-5">
-                            {Object.entries(THEME).map(([key, cfg]) => {
-                                const count = (habitData[todayStr] || []).filter(h => h === key).length;
-                                return (
-                                    <div 
-                                        key={key} 
-                                        onClick={() => logActivity(key)} 
-                                        className="soft-card p-6 flex flex-col gap-5 cursor-pointer active:scale-[0.98] transition-all"
-                                    >
-                                        <div className="flex justify-between items-start">
-                                            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ backgroundColor: cfg.bg, color: cfg.color }}>
-                                                <Icon name={key === 'growth' ? 'leaf' : key === 'fitness' ? 'zap' : key === 'beauty' ? 'sparkles' : 'coffee'} size={16} />
-                                            </div>
-                                            {count > 0 && (
-                                                <div className="text-[10px] font-bold" style={{ color: cfg.color }}>{count}</div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xs font-semibold text-[#55524E]">{cfg.label}</h3>
-                                            <p className="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-0.5">Check In</p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                    </div>
+<body class="no-scrollbar px-6 py-10 pb-28 flex justify-center">
+    <div class="w-full max-w-[420px] space-y-9">
+        
+        <!-- HEADER: 天气日期 & 极简建议 -->
+        <header class="space-y-4">
+            <div class="flex justify-between items-end">
+                <div class="space-y-1">
+                    <h1 class="text-2xl font-light tracking-tight">Life OS</h1>
+                    <div id="current-date" class="text-[10px] font-semibold text-[#B8B4AF] uppercase tracking-[0.2em]">MARCH 02, MON</div>
                 </div>
-            );
+                <div class="flex items-center gap-2 text-[#9A9691] text-xs font-medium bg-[#F9F9F7] px-3 py-1.5 rounded-full border border-[#F1F1EE]">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>
+                    <span>14°C</span>
+                </div>
+            </div>
+            
+            <div class="pl-3 border-l-2 border-[#F1F1EE] ml-0.5">
+                <p id="ai-insight" class="text-[11px] text-[#A3A09A] leading-relaxed tracking-wide font-medium">
+                    14°C, 舒爽微风。宜叠穿针织，保持室内通风，高效执行。
+                </p>
+            </div>
+        </header>
+
+        <!-- RITUAL: 日程与日记 -->
+        <section class="soft-card p-9 space-y-8">
+            <div class="space-y-1">
+                <h2 class="text-sm font-semibold text-[#55524E] tracking-tight">Daily Ritual</h2>
+                <p class="text-[9px] text-[#B8B4AF] font-bold uppercase tracking-widest">Schedule & Diary</p>
+            </div>
+
+            <div class="space-y-4" id="schedule-container">
+                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Morning Meditation
+                </div>
+                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Productive Focus
+                </div>
+                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Wellness Walk
+                </div>
+                <div class="flex items-center gap-4 text-xs text-[#7A7672] font-medium">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#E5E5E0]"></div>Reading Session
+                </div>
+            </div>
+
+            <div class="pt-4 relative">
+                <input id="diary-input" type="text" placeholder="Record your focus..." 
+                    class="w-full bg-[#F9F9F7] rounded-2xl py-4 pl-5 pr-12 text-xs font-medium border border-transparent focus:bg-white focus:border-[#F1F1EE] outline-none transition-all">
+                <button id="send-btn" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#D1CDC8] hover:text-[#A3A09A]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- FLOW: 数据统计热力图 -->
+        <section class="space-y-4 px-1">
+            <div class="flex justify-between items-center px-1">
+                <span class="text-[10px] font-bold text-[#B8B4AF] uppercase tracking-[0.2em]">Activity Flow</span>
+                <div class="flex gap-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#9DB2A0]"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#B8979F]"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#D6BBA0]"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#A0B2C0]"></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-7 gap-2" id="heatmap-grid">
+                <!-- 由 JavaScript 填充 -->
+            </div>
+        </section>
+
+        <!-- HABITS: 四个核心模块 -->
+        <div class="grid grid-cols-2 gap-5">
+            <!-- Growth -->
+            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="growth">
+                <div class="flex justify-between items-start">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F4F7F5] text-[#9DB2A0]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8a13 13 0 0 1-13 13Z"/><path d="M9.5 15.34a5 5 0 0 1 0-5.34"/></svg>
+                    </div>
+                    <span class="counter text-[10px] font-bold text-[#9DB2A0]">0</span>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-[#55524E]">Self Growth</h3>
+                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Focus</p>
+                </div>
+            </div>
+
+            <!-- Fitness -->
+            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="fitness">
+                <div class="flex justify-between items-start">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F8F4F5] text-[#B8979F]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14.71 13 3l-2.25 8.25H20L11 21l2.25-8.25H4Z"/></svg>
+                    </div>
+                    <span class="counter text-[10px] font-bold text-[#B8979F]">0</span>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-[#55524E]">Fitness</h3>
+                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Check In</p>
+                </div>
+            </div>
+
+            <!-- Beauty -->
+            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="beauty">
+                <div class="flex justify-between items-start">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F9F7F4] text-[#D6BBA0]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    </div>
+                    <span class="counter text-[10px] font-bold text-[#D6BBA0]">0</span>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-[#55524E]">Beauty</h3>
+                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Ritual</p>
+                </div>
+            </div>
+
+            <!-- Soul Space -->
+            <div class="soft-card p-7 flex flex-col gap-6 habit-tile" data-type="soul">
+                <div class="flex justify-between items-start">
+                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#F4F7F9] text-[#A0B2C0]">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h12Z"/><path d="M17 12h2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-2"/></svg>
+                    </div>
+                    <span class="counter text-[10px] font-bold text-[#A0B2C0]">0</span>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-[#55524E]">Soul Space</h3>
+                    <p class="text-[8px] text-[#D1CDC8] font-bold uppercase tracking-widest mt-1">Peace</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 初始化日期
+        const dateDisplay = document.getElementById('current-date');
+        const now = new Date();
+        const options = { month: 'long', day: 'numeric', weekday: 'short' };
+        dateDisplay.innerText = now.toLocaleDateString('en-US', options).toUpperCase();
+
+        // 2. 模拟数据存储 (你可以之后替换为 Firebase)
+        let habitStats = { growth: 0, fitness: 0, beauty: 0, soul: 0 };
+
+        // 3. 生成日历热力图
+        const heatmapGrid = document.getElementById('heatmap-grid');
+        const daysInMonth = 28; 
+        for (let i = 1; i <= daysInMonth; i++) {
+            const cell = document.createElement('div');
+            cell.className = `heatmap-cell ${i === now.getDate() ? 'today' : ''}`;
+            cell.innerHTML = `
+                <span class="text-[7px] font-bold text-[#D1CDC8] m-1 inline-block">${i}</span>
+                <div class="dot-group" id="dots-${i}"></div>
+            `;
+            heatmapGrid.appendChild(cell);
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // 4. 打卡交互逻辑
+        document.querySelectorAll('.habit-tile').forEach(tile => {
+            tile.onclick = () => {
+                const type = tile.getAttribute('data-type');
+                habitStats[type]++;
+                
+                // 更新磁贴数字
+                tile.querySelector('.counter').innerText = habitStats[type];
+                
+                // 在热力图今天的位置添加一个小点
+                const todayDots = document.getElementById(`dots-${now.getDate()}`);
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue(`--color-${type}`);
+                todayDots.appendChild(dot);
+            };
+        });
+
+        // 5. 日记输入逻辑
+        const diaryInput = document.getElementById('diary-input');
+        const sendBtn = document.getElementById('send-btn');
+        const insightText = document.getElementById('ai-insight');
+
+        sendBtn.onclick = () => {
+            const val = diaryInput.value.trim();
+            if (!val) return;
+            
+            // 简单反馈动画
+            insightText.innerText = "已记录：计划正在有条不紊地推进。";
+            diaryInput.value = "";
+            
+            // 模拟在 Schedule 里添加一项
+            const container = document.getElementById('schedule-container');
+            const newItem = document.createElement('div');
+            newItem.className = "flex items-center gap-4 text-xs text-[#7A7672] font-medium opacity-0 transform translate-y-2 transition-all duration-300";
+            newItem.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-[#D6BBA0]"></div>${val}`;
+            container.appendChild(newItem);
+            
+            setTimeout(() => {
+                newItem.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+        };
     </script>
 </body>
 </html>
